@@ -29,23 +29,28 @@ class SongsService {
   }
 
   async getSongs(params) {
+    let queryText = 'SELECT id, title, performer FROM songs WHERE 1=1';
+    const queryValues = [];
+
+    if (params.title) {
+      queryText += ` and LOWER(title) LIKE $${queryValues.length + 1}`;
+      queryValues.push(`%${params.title.toLowerCase()}%`);
+    }
+
+    if (params.performer) {
+      queryText += ` and LOWER(performer) LIKE $${queryValues.length + 1}`;
+      queryValues.push(`%${params.performer.toLowerCase()}%`);
+    }
+
     const query = {
-      text: 'SELECT id, title, performer FROM songs',
+      text: queryText,
+      values: queryValues,
     };
+
     const fetch = await this._pool.query(query);
     const songs = fetch.rows;
 
-    let filteredSong = songs;
-
-    if ('title' in params) {
-      filteredSong = filteredSong.filter((song) => song.title.toLowerCase().includes(params.title));
-    }
-
-    if ('performer' in params) {
-      filteredSong = filteredSong.filter((song) => song.performer.toLowerCase().includes(params.performer));
-    }
-
-    return filteredSong;
+    return songs;
   }
 
   async getSongById(id) {
@@ -55,7 +60,7 @@ class SongsService {
     };
     const fetch = await this._pool.query(query);
 
-    if (!fetch.rows.length) {
+    if (!fetch.rowCount) {
       throw new NotFoundError('Lagu tidak ditemukan');
     }
     return fetch.rows.map(mapSongDB)[0];
@@ -70,7 +75,7 @@ class SongsService {
     };
     const fetch = await this._pool.query(query);
 
-    if (!fetch.rows.length) {
+    if (!fetch.rowCount) {
       throw new NotFoundError('Gagal memperbarui lagu. Id tidak ditemukan');
     }
   }
@@ -83,7 +88,7 @@ class SongsService {
 
     const fetch = await this._pool.query(query);
 
-    if (!fetch.rows.length) {
+    if (!fetch.rowCount) {
       throw new NotFoundError('Lagu gagal dihapus. Id tidak ditemukan');
     }
   }
