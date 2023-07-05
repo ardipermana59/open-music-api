@@ -2,17 +2,17 @@ const routes = (handler) => [
   {
     method: 'POST',
     path: '/authentications',
-    handler: (request, h) => handler.postAuthenticationHandler(request, h),
+    handler: handler.postAuthenticationHandler,
   },
   {
     method: 'PUT',
     path: '/authentications',
-    handler: (request) => handler.putAuthenticationHandler(request),
+    handler: handler.putAuthenticationHandler,
   },
   {
     method: 'DELETE',
     path: '/authentications',
-    handler: (request) => handler.deleteAuthenticationHandler(request),
+    handler: handler.deleteAuthenticationHandler,
   },
 ];
 

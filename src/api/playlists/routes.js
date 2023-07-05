@@ -1,7 +1,7 @@
 const routes = (handler) => [{
   method: 'POST',
   path: '/playlists',
-  handler: (request, h) => handler.postPlaylistHandler(request, h),
+  handler: handler.postPlaylistHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -9,7 +9,7 @@ const routes = (handler) => [{
 {
   method: 'GET',
   path: '/playlists',
-  handler: (request) => handler.getPlaylistsHandler(request),
+  handler: handler.getPlaylistsHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -17,7 +17,7 @@ const routes = (handler) => [{
 {
   method: 'GET',
   path: '/playlists/{id}',
-  handler: (request) => handler.getPlaylistByIdHandler(request),
+  handler: handler.getPlaylistByIdHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -25,7 +25,7 @@ const routes = (handler) => [{
 {
   method: 'DELETE',
   path: '/playlists/{id}',
-  handler: (request) => handler.deletePlaylistByIdHandler(request),
+  handler: handler.deletePlaylistByIdHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -34,7 +34,7 @@ const routes = (handler) => [{
 {
   method: 'POST',
   path: '/playlists/{playlistId}/songs',
-  handler: (request, h) => handler.postPlaylistSongHandler(request, h),
+  handler: handler.postPlaylistSongHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -42,7 +42,7 @@ const routes = (handler) => [{
 {
   method: 'GET',
   path: '/playlists/{playlistId}/songs',
-  handler: (request) => handler.getPlaylistSongsHandler(request),
+  handler: handler.getPlaylistSongsHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -50,7 +50,7 @@ const routes = (handler) => [{
 {
   method: 'DELETE',
   path: '/playlists/{playlistId}/songs',
-  handler: (request) => handler.deletePlaylistSongByIdHandler(request),
+  handler: handler.deletePlaylistSongByIdHandler,
   options: {
     auth: 'music_jwt',
   },
@@ -58,7 +58,7 @@ const routes = (handler) => [{
 {
   method: 'GET',
   path: '/playlists/{id}/activities',
-  handler: (request, h) => handler.getPlaylistActivitiesHandler(request, h),
+  handler: handler.getPlaylistActivitiesHandler,
   options: {
     auth: 'music_jwt',
   },

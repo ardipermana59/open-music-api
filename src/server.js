@@ -1,6 +1,8 @@
+const path = require('path');
 require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
 const ClientError = require('./exceptions/ClientError');
 
 // albums
@@ -34,12 +36,25 @@ const Collaborations = require('./api/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsServices');
 const CollaborationsValidator = require('./validator/collaborations');
 
+// Exports
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
+
+// Storage
+const StorageService = require('./services/storage/StorageService');
+
+// Cache
+const CacheService = require('./services/redis/CacheService');
+
 const init = async () => {
+  const cacheService = new CacheService();
   const collaborationsService = new CollaborationsService();
-  const albumsService = new AlbumsService();
+  const albumsService = new AlbumsService(cacheService);
   const playlistsService = new PlaylistsService(collaborationsService);
   const authenticationsService = new AuthenticationsService();
   const usersService = new UsersService();
+  const storageService = new StorageService(path.resolve(__dirname, 'api/albums/file/covers'));
 
   const server = Hapi.server({
     port: process.env.PORT,
@@ -69,9 +84,11 @@ const init = async () => {
         statusCode,
         payload,
       } = response.output;
-      if (statusCode === 401) {
-        return h.response(payload).code(401);
+
+      if (statusCode !== 500) {
+        return h.response(payload).code(statusCode);
       }
+
       const newResponse = h.response({
         status: 'error',
         message: 'Maaf, terjadi kegagalan pada server kami.',
@@ -83,9 +100,13 @@ const init = async () => {
     return response.continue || response;
   });
 
-  await server.register([{
-    plugin: Jwt,
-  },
+  await server.register([
+    {
+      plugin: Jwt,
+    },
+    {
+      plugin: Inert,
+    },
   ]);
 
   server.auth.strategy('music_jwt', 'jwt', {
@@ -116,6 +137,7 @@ const init = async () => {
     options: {
       service: albumsService,
       validator: AlbumsValidator,
+      storageService,
     },
   },
   {
@@ -147,6 +169,14 @@ const init = async () => {
       collaborationsService,
       playlistsService,
       validator: CollaborationsValidator,
+    },
+  },
+  {
+    plugin: _exports,
+    options: {
+      service: ProducerService,
+      validator: ExportsValidator,
+      playlistsService,
     },
   },
   ]);
